@@ -1,0 +1,3232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Leveling Quest System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a1a;
+            --primary-accent: #00d4ff;
+            --secondary-accent: #0066ff;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888899;
+            --card-bg: #12122a;
+            --card-border: #1a1a3a;
+            --success: #00ff88;
+            --danger: #ff3366;
+            --xp-gold: #ffaa00;
+            --rank-e: #888899;
+            --rank-d: #22aa22;
+            --rank-c: #3366ff;
+            --rank-b: #9966ff;
+            --rank-a: #ff8800;
+            --rank-s: #ffd700;
+            --rank-national: #ff2222;
+            --rank-special: #aa0000;
+            --rank-monarch: #9933ff;
+            --rank-shadow: #440066;
+        }
+
+        body {
+            font-family: 'Rajdhani', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-size: 16px;
+            line-height: 1.5;
+            padding-top: constant(safe-area-inset-top, 0px);
+            padding-top: env(safe-area-inset-top, 0px);
+        }
+
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 28px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 60px;
+            padding-top: 24px;
+        }
+
+        /* Top Stats Bar */
+        .stats-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .level-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .level-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .level-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary-accent);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+        }
+
+        .rank-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: 1px solid;
+        }
+
+        .rank-badge.e { background: rgba(136, 136, 153, 0.2); color: var(--rank-e); border-color: var(--rank-e); }
+        .rank-badge.d { background: rgba(34, 170, 34, 0.2); color: var(--rank-d); border-color: var(--rank-d); }
+        .rank-badge.c { background: rgba(51, 102, 255, 0.2); color: var(--rank-c); border-color: var(--rank-c); }
+        .rank-badge.b { background: rgba(153, 102, 255, 0.2); color: var(--rank-b); border-color: var(--rank-b); }
+        .rank-badge.a { background: rgba(255, 136, 0, 0.2); color: var(--rank-a); border-color: var(--rank-a); }
+        .rank-badge.s { background: rgba(255, 215, 0, 0.2); color: var(--rank-s); border-color: var(--rank-s); text-shadow: 0 0 8px rgba(255, 215, 0, 0.6); }
+        .rank-badge.national { background: rgba(255, 34, 34, 0.2); color: var(--rank-national); border-color: var(--rank-national); text-shadow: 0 0 8px rgba(255, 34, 34, 0.6); }
+        .rank-badge.special { background: rgba(170, 0, 0, 0.2); color: #ff4444; border-color: #ff4444; text-shadow: 0 0 8px rgba(255, 68, 68, 0.6); }
+        .rank-badge.monarch { background: rgba(153, 51, 255, 0.2); color: #bb66ff; border-color: #bb66ff; text-shadow: 0 0 8px rgba(187, 102, 255, 0.6); }
+        .rank-badge.shadow { background: rgba(68, 0, 102, 0.3); color: #cc66ff; border-color: #cc66ff; text-shadow: 0 0 12px rgba(204, 102, 255, 0.8), 0 0 20px rgba(68, 0, 102, 0.6); animation: shadowPulse 2s ease-in-out infinite; }
+
+        @keyframes shadowPulse {
+            0%, 100% { box-shadow: 0 0 8px rgba(204, 102, 255, 0.4); }
+            50% { box-shadow: 0 0 16px rgba(204, 102, 255, 0.6), 0 0 24px rgba(68, 0, 102, 0.4); }
+        }
+
+        .xp-container {
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .xp-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .xp-bar {
+            height: 10px;
+            background: #1a1a2e;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--xp-gold), #ff8800);
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+            transition: width 0.3s ease;
+        }
+
+        .hp-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hp-icon {
+            color: var(--danger);
+            text-shadow: 0 0 8px rgba(255, 51, 102, 0.8);
+            font-size: 20px;
+        }
+
+        .hp-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--danger);
+            text-shadow: 0 0 8px rgba(255, 51, 102, 0.6);
+        }
+
+        /* Heal Button */
+        .heal-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: linear-gradient(180deg, rgba(0, 255, 136, 0.15), transparent);
+            border: 1px solid var(--success);
+            border-radius: 6px;
+            color: var(--success);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .heal-btn:hover {
+            background: linear-gradient(180deg, rgba(0, 255, 136, 0.25), transparent);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+        }
+
+        .heal-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .heal-btn.active {
+            background: linear-gradient(180deg, rgba(0, 255, 136, 0.3), transparent);
+            animation: healPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes healPulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 255, 136, 0.4); }
+            50% { box-shadow: 0 0 15px rgba(0, 255, 136, 0.6); }
+        }
+
+        .heal-timer-container {
+            margin-top: 12px;
+            padding: 14px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .heal-timer-container.paused {
+            border-color: var(--xp-gold);
+            background: rgba(255, 170, 0, 0.1);
+        }
+
+        .heal-timer-title {
+            font-size: 13px;
+            color: var(--success);
+            margin-bottom: 6px;
+        }
+
+        .heal-timer-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--success);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+            margin-bottom: 10px;
+        }
+
+        .heal-timer-display.paused {
+            color: var(--xp-gold);
+            text-shadow: 0 0 10px rgba(255, 170, 0, 0.6);
+        }
+
+        .heal-timer-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .heal-timer-btn {
+            padding: 6px 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .heal-timer-btn.cancel {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .cooldown-timer {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* Level Up Banner */
+        .level-up-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 10, 26, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            text-align: center;
+            animation: levelUpFade 3s ease-out forwards;
+        }
+
+        @keyframes levelUpFade {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .level-up-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--xp-gold);
+            text-shadow: 0 0 30px rgba(255, 170, 0, 0.8), 0 0 60px rgba(255, 170, 0, 0.5);
+            animation: levelUpPulse 0.5s ease-in-out infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes levelUpPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .level-up-subtitle {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 24px;
+            color: var(--text-primary);
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+        }
+
+        .level-up-stats {
+            margin-top: 24px;
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .level-up-stat {
+            margin: 8px 0;
+        }
+
+        .level-up-stat span {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* Rank Up Banner */
+        .rank-up-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 10, 26, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            text-align: center;
+            animation: rankUpFade 4s ease-out forwards;
+        }
+
+        @keyframes rankUpFade {
+            0% { opacity: 0; transform: scale(1.2); }
+            20% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .rank-up-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary-accent);
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
+            margin-bottom: 16px;
+            animation: rankUpPulse 0.6s ease-in-out infinite;
+        }
+
+        @keyframes rankUpPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .rank-up-subtitle {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 28px;
+            color: var(--xp-gold);
+            text-shadow: 0 0 15px rgba(255, 170, 0, 0.8);
+        }
+
+        .rank-up-shadow-monarch {
+            font-size: 32px;
+            color: #cc66ff;
+            text-shadow: 0 0 30px rgba(204, 102, 255, 0.8), 0 0 50px rgba(68, 0, 102, 0.6), 0 0 80px rgba(68, 0, 102, 0.4);
+            animation: shadowMonarchPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes shadowMonarchPulse {
+            0%, 100% { transform: scale(1); text-shadow: 0 0 30px rgba(204, 102, 255, 0.8), 0 0 50px rgba(68, 0, 102, 0.6); }
+            50% { transform: scale(1.08); text-shadow: 0 0 40px rgba(204, 102, 255, 1), 0 0 60px rgba(68, 0, 102, 0.8), 0 0 100px rgba(68, 0, 102, 0.5); }
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px 8px;
+            min-height: 52px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-btn:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.15), transparent);
+            border-color: var(--primary-accent);
+            color: var(--primary-accent);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        }
+
+        /* Quest Content */
+        .quest-content {
+            flex: 1;
+        }
+
+        .quest-section {
+            display: none;
+        }
+
+        .quest-section.active {
+            display: block;
+        }
+
+        /* Quest Cards */
+        .quest-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .quest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+
+        .quest-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 17px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-accent);
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+        }
+
+        .quest-difficulty {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .quest-difficulty.s { background: rgba(255, 215, 0, 0.2); color: var(--rank-s); }
+        .quest-difficulty.a { background: rgba(255, 136, 0, 0.2); color: var(--rank-a); }
+        .quest-difficulty.b { background: rgba(153, 102, 255, 0.2); color: var(--rank-b); }
+        .quest-difficulty.c { background: rgba(51, 102, 255, 0.2); color: var(--rank-c); }
+        .quest-difficulty.d { background: rgba(34, 170, 34, 0.2); color: var(--rank-d); }
+        .quest-difficulty.e { background: rgba(136, 136, 153, 0.2); color: var(--rank-e); }
+
+        .quest-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .quest-progress {
+            margin-bottom: 12px;
+        }
+
+        .quest-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .quest-progress-bar {
+            height: 8px;
+            background: #1a1a2e;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .quest-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-accent), var(--secondary-accent));
+            border-radius: 4px;
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+            transition: width 0.3s ease;
+        }
+
+        .quest-rewards {
+            display: flex;
+            gap: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .reward-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+
+        .reward-icon {
+            color: var(--success);
+            text-shadow: 0 0 6px rgba(0, 255, 136, 0.6);
+        }
+
+        .reward-value {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .quest-penalty {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--card-border);
+            font-size: 13px;
+            color: var(--danger);
+        }
+
+        .penalty-icon {
+            margin-right: 6px;
+        }
+
+        .start-focus-btn {
+            width: 100%;
+            margin-top: 16px;
+            padding: 12px;
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.2), transparent);
+            border: 1px solid var(--primary-accent);
+            border-radius: 6px;
+            color: var(--primary-accent);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .start-focus-btn:hover:not(:disabled) {
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.3), transparent);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .start-focus-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Timer */
+        .timer-container {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--primary-accent);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .timer-container.paused {
+            border-color: var(--xp-gold);
+            background: rgba(255, 170, 0, 0.1);
+        }
+
+        .timer-container.forfeited {
+            border-color: var(--danger);
+            background: rgba(255, 51, 102, 0.1);
+        }
+
+        .timer-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .timer-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary-accent);
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+            margin-bottom: 12px;
+        }
+
+        .timer-display.paused {
+            color: var(--xp-gold);
+            text-shadow: 0 0 15px rgba(255, 170, 0, 0.6);
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .timer-btn {
+            padding: 8px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .timer-btn.pause {
+            background: rgba(255, 51, 102, 0.2);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .timer-btn.reset {
+            background: rgba(255, 170, 0, 0.2);
+            border-color: var(--xp-gold);
+            color: var(--xp-gold);
+        }
+
+        .timer-warning {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        /* Add Quest Form */
+        .add-quest-toggle {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            border: 1px dashed var(--card-border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+
+        .add-quest-toggle:hover, .add-quest-toggle.active {
+            border-color: var(--primary-accent);
+            color: var(--primary-accent);
+        }
+
+        .add-quest-form {
+            display: none;
+            padding: 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .add-quest-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #1a1a2e;
+            border: 1px solid var(--card-border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .form-error {
+            font-size: 11px;
+            color: var(--danger);
+            margin-top: 4px;
+            display: none;
+        }
+
+        .form-error.show {
+            display: block;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(180deg, rgba(0, 255, 136, 0.2), transparent);
+            border: 1px solid var(--success);
+            border-radius: 6px;
+            color: var(--success);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .form-submit:hover {
+            background: linear-gradient(180deg, rgba(0, 255, 136, 0.3), transparent);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .form-checkbox input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 24px;
+            font-style: italic;
+        }
+
+        /* System Message */
+        .system-message {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            font-family: 'Rajdhani', monospace;
+            font-size: 14px;
+            color: var(--primary-accent);
+        }
+
+        .system-log {
+            margin-top: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .system-log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 13px;
+        }
+
+        .system-log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .system-log-time {
+            color: var(--text-secondary);
+            margin-right: 8px;
+        }
+
+        .system-log-text {
+            color: var(--text-primary);
+        }
+
+        .system-log-entry.success .system-log-text { color: var(--success); }
+        .system-log-entry.penalty .system-log-text { color: var(--danger); }
+        .system-log-entry.levelup .system-log-text { color: var(--xp-gold); }
+        .system-log-entry.rankup .system-log-text { color: var(--primary-accent); font-weight: 600; }
+
+        /* History Tab */
+        .history-section {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        .history-section.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .history-filter-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .history-select {
+            flex: 1;
+            padding: 10px 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .history-select:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .history-search {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+        }
+
+        .history-search:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+        }
+
+        .history-search::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .history-btn {
+            padding: 10px 14px;
+            background: transparent;
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .history-btn:hover {
+            border-color: var(--primary-accent);
+            color: var(--primary-accent);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+
+        .history-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            padding-right: 4px;
+        }
+
+        .history-empty {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 40px;
+            font-style: italic;
+        }
+
+        .history-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            transition: border-color 0.2s ease;
+        }
+
+        .history-card:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .history-card.quest_complete { border-left: 3px solid var(--success); }
+        .history-card.xp_gain { border-left: 3px solid var(--xp-gold); }
+        .history-card.hp_loss { border-left: 3px solid var(--danger); }
+        .history-card.hp_gain { border-left: 3px solid var(--success); }
+        .history-card.level_up { border-left: 3px solid var(--xp-gold); }
+        .history-card.rank_up { border-left: 3px solid var(--rank-s); }
+        .history-card.penalty { border-left: 3px solid var(--danger); }
+        .history-card.daily_reset { border-left: 3px solid var(--primary-accent); }
+        .history-card.timer_start { border-left: 3px solid var(--primary-accent); }
+        .history-card.timer_pause { border-left: 3px solid var(--xp-gold); }
+        .history-card.timer_resume { border-left: 3px solid var(--success); }
+        .history-card.timer_cancel { border-left: 3px solid var(--xp-gold); }
+        .history-card.session_forfeit { border-left: 3px solid var(--danger); }
+        .history-card.system { border-left: 3px solid var(--primary-accent); }
+        .history-card.gold_gain { border-left: 3px solid var(--rank-s); }
+        .history-card.gold_spend { border-left: 3px solid var(--xp-gold); }
+        .history-card.other { border-left: 3px solid var(--text-secondary); }
+
+        .history-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .history-icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+
+        .history-type-badge {
+            font-size: 9px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .history-type-badge.quest_complete { background: rgba(0, 255, 136, 0.2); color: var(--success); }
+        .history-type-badge.xp_gain { background: rgba(255, 170, 0, 0.2); color: var(--xp-gold); }
+        .history-type-badge.hp_loss { background: rgba(255, 51, 102, 0.2); color: var(--danger); }
+        .history-type-badge.hp_gain { background: rgba(0, 255, 136, 0.2); color: var(--success); }
+        .history-type-badge.level_up { background: rgba(255, 170, 0, 0.2); color: var(--xp-gold); }
+        .history-type-badge.rank_up { background: rgba(255, 215, 0, 0.3); color: var(--rank-s); text-shadow: 0 0 6px rgba(255, 215, 0, 0.5); }
+        .history-type-badge.penalty { background: rgba(255, 51, 102, 0.2); color: var(--danger); }
+        .history-type-badge.daily_reset { background: rgba(0, 212, 255, 0.2); color: var(--primary-accent); }
+        .history-type-badge.timer_start { background: rgba(0, 212, 255, 0.2); color: var(--primary-accent); }
+        .history-type-badge.timer_pause { background: rgba(255, 170, 0, 0.2); color: var(--xp-gold); }
+        .history-type-badge.timer_resume { background: rgba(0, 255, 136, 0.2); color: var(--success); }
+        .history-type-badge.timer_cancel { background: rgba(255, 170, 0, 0.2); color: var(--xp-gold); }
+        .history-type-badge.session_forfeit { background: rgba(255, 51, 102, 0.2); color: var(--danger); }
+        .history-type-badge.system { background: rgba(0, 212, 255, 0.15); color: var(--primary-accent); }
+        .history-type-badge.gold_gain { background: rgba(255, 215, 0, 0.2); color: var(--rank-s); }
+        .history-type-badge.gold_spend { background: rgba(255, 170, 0, 0.2); color: var(--xp-gold); }
+        .history-type-badge.other { background: rgba(136, 136, 153, 0.2); color: var(--text-secondary); }
+
+        .history-timestamp {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .history-message {
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .history-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 11px;
+        }
+
+        .history-detail {
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 4px;
+            color: var(--text-secondary);
+        }
+
+        .history-detail.xp { color: var(--xp-gold); font-weight: 600; }
+        .history-detail.hp_loss { color: var(--danger); font-weight: 600; }
+        .history-detail.hp_gain { color: var(--success); font-weight: 600; }
+        .history-detail.gold { color: var(--rank-s); font-weight: 600; }
+        .history-detail.level { color: var(--primary-accent); font-weight: 600; }
+        .history-detail.rank { color: var(--rank-s); font-weight: 600; }
+
+        /* Custom scrollbar */
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-list::-webkit-scrollbar-track {
+            background: var(--card-border);
+            border-radius: 3px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: var(--primary-accent);
+            border-radius: 3px;
+            opacity: 0.6;
+        }
+
+        .history-list::-webkit-scrollbar-thumb:hover {
+            opacity: 1;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .profile-header:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .profile-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+        }
+
+        .profile-toggle {
+            color: var(--primary-accent);
+            transition: transform 0.2s ease;
+        }
+
+        .profile-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .profile-content {
+            display: none;
+            padding: 0 16px 16px;
+        }
+
+        .profile-content.open {
+            display: block;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .profile-stat {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .profile-stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .profile-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .profile-rank-ladder {
+            border-top: 1px solid var(--card-border);
+            padding-top: 16px;
+        }
+
+        .profile-rank-ladder-title {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .profile-rank-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .profile-rank-item {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+        }
+
+        .profile-rank-item.achieved {
+            border-color: currentColor;
+            box-shadow: 0 0 6px currentColor;
+        }
+
+        .profile-rank-item.current {
+            border-width: 2px;
+            animation: currentRankPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes currentRankPulse {
+            0%, 100% { box-shadow: 0 0 4px currentColor; }
+            50% { box-shadow: 0 0 10px currentColor, 0 0 15px rgba(0, 0, 0, 0.3); }
+        }
+
+        .profile-rank-item.e.achieved { color: var(--rank-e); }
+        .profile-rank-item.d.achieved { color: var(--rank-d); }
+        .profile-rank-item.c.achieved { color: var(--rank-c); }
+        .profile-rank-item.b.achieved { color: var(--rank-b); }
+        .profile-rank-item.a.achieved { color: var(--rank-a); }
+        .profile-rank-item.s.achieved { color: var(--rank-s); }
+        .profile-rank-item.national.achieved { color: var(--rank-national); }
+        .profile-rank-item.special.achieved { color: var(--rank-special); }
+        .profile-rank-item.monarch.achieved { color: var(--rank-monarch); }
+        .profile-rank-item.shadow.achieved { color: #aa55ff; }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 16px;
+                padding-top: 24px;
+                padding-bottom: 40px;
+            }
+
+            .stats-bar {
+                padding: 16px;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+
+            .xp-container {
+                order: 3;
+                margin: 0;
+                width: 100%;
+            }
+
+            .quest-header {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .tab-btn {
+                padding: 14px 8px;
+                font-size: 12px;
+                min-height: 48px;
+            }
+
+            .footer {
+                flex-direction: column;
+                gap: 4px;
+                text-align: center;
+                padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+                padding-bottom: calc(20px + constant(safe-area-inset-bottom, 0px));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Stats Bar -->
+        <div class="stats-bar" id="stats-bar">
+            <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Profile Section -->
+        <div class="profile-section">
+            <div class="profile-header" onclick="toggleProfile()">
+                <span class="profile-title">Profile</span>
+                <span class="profile-toggle" id="profile-toggle">&#9660;</span>
+            </div>
+            <div class="profile-content" id="profile-content">
+                <!-- Rendered dynamically -->
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="daily">Daily Quests</button>
+            <button class="tab-btn" data-tab="side">Side Quests</button>
+            <button class="tab-btn" data-tab="big">Big Quests</button>
+            <button class="tab-btn" data-tab="history">History</button>
+        </div>
+
+        <!-- Quest Content Area -->
+        <div class="quest-content">
+            <!-- Daily Quests -->
+            <div class="quest-section active" id="daily">
+                <button class="add-quest-toggle" onclick="toggleAddForm('daily')">+ Add Daily Quest</button>
+                <div class="add-quest-form" id="daily-form">
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-input" id="daily-title" placeholder="Quest title">
+                        <div class="form-error" id="daily-title-error">Title is required</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-input" id="daily-desc" placeholder="Brief description">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Required Sessions</label>
+                            <input type="number" class="form-input" id="daily-sessions" min="1" value="1">
+                            <div class="form-error" id="daily-sessions-error">Must be at least 1</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Penalty HP Loss</label>
+                            <input type="number" class="form-input" id="daily-penalty" min="0" value="10">
+                        </div>
+                    </div>
+                    <button class="form-submit" onclick="submitDailyQuest()">Create Quest</button>
+                </div>
+                <div id="daily-quests"></div>
+            </div>
+
+            <!-- Side Quests -->
+            <div class="quest-section" id="side">
+                <button class="add-quest-toggle" onclick="toggleAddForm('side')">+ Add Side Quest</button>
+                <div class="add-quest-form" id="side-form">
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-input" id="side-title" placeholder="Quest title">
+                        <div class="form-error" id="side-title-error">Title is required</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-input" id="side-desc" placeholder="Brief description">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Required Sessions</label>
+                            <input type="number" class="form-input" id="side-sessions" min="1" value="1">
+                            <div class="form-error" id="side-sessions-error">Must be at least 1</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">XP Reward</label>
+                            <input type="number" class="form-input" id="side-xp" min="0" value="100">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Reward Item (optional)</label>
+                        <input type="text" class="form-input" id="side-item" placeholder="e.g., Rare Chest">
+                    </div>
+                    <button class="form-submit" onclick="submitSideQuest()">Create Quest</button>
+                </div>
+                <div id="side-quests"></div>
+            </div>
+
+            <!-- Big Quests -->
+            <div class="quest-section" id="big">
+                <button class="add-quest-toggle" onclick="toggleAddForm('big')">+ Add Big Quest</button>
+                <div class="add-quest-form" id="big-form">
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-input" id="big-title" placeholder="Quest title">
+                        <div class="form-error" id="big-title-error">Title is required</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-input" id="big-desc" placeholder="Brief description">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Required Sessions</label>
+                            <input type="number" class="form-input" id="big-sessions" min="1" value="1">
+                            <div class="form-error" id="big-sessions-error">Must be at least 1</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">XP Reward</label>
+                            <input type="number" class="form-input" id="big-xp" min="0" value="500">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Reward Item (optional)</label>
+                        <input type="text" class="form-input" id="big-item" placeholder="e.g., Legendary Weapon">
+                    </div>
+                    <div class="form-checkbox">
+                        <input type="checkbox" id="big-main">
+                        <label for="big-main">Main Story Quest</label>
+                    </div>
+                    <button class="form-submit" onclick="submitBigQuest()">Create Quest</button>
+                </div>
+                <div id="big-quests"></div>
+            </div>
+
+            <!-- History Section -->
+            <div class="history-section" id="history">
+                <div class="history-controls">
+                    <div class="history-filter-row">
+                        <select class="history-select" id="history-filter" onchange="renderHistory()">
+                            <option value="all">All Events</option>
+                            <option value="quest_complete">Quest Complete</option>
+                            <option value="xp_gain">XP Gain</option>
+                            <option value="hp_change">HP Change</option>
+                            <option value="penalty">Penalty</option>
+                            <option value="rank_up">Rank Up</option>
+                            <option value="level_up">Level Up</option>
+                            <option value="timer">Timer Events</option>
+                            <option value="system">System</option>
+                        </select>
+                        <button class="history-btn" onclick="exportEventLog()" title="Copy to clipboard">Copy</button>
+                    </div>
+                    <input type="text" class="history-search" id="history-search" placeholder="Search events..." oninput="renderHistory()">
+                </div>
+                <div class="history-header">
+                    <span class="history-title">Event History</span>
+                    <button class="history-btn" onclick="clearEventLog()">Clear All</button>
+                </div>
+                <div class="history-list" id="history-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== CONSTANTS ====================
+        const LOGIN_BONUS_XP = 50;
+        const HEAL_COST_XP = 50;
+        const HEAL_AMOUNT = 20;
+        const HP_PER_LEVEL = 10;
+        const XP_SCALE = 1.2;
+        const STORAGE_KEY = 'soloLevelingQuests';
+        const POMODORO_TIME = 25 * 60;
+        const HEAL_FOCUS_TIME = 5 * 60; // 5 minutes
+        const HEAL_PERCENT = 20; // 20% of max HP
+        const HEAL_COOLDOWN = 60 * 60 * 1000; // 1 hour in ms
+        const LOG_ENTRIES = 8;
+        const AWAY_THRESHOLD_MS = 90 * 1000; // 90 seconds to forfeit
+        const DISTRACTION_PENALTY_HP = 10;
+
+        // Rank definitions: name, min level, CSS class, required daily quests
+        const RANK_TIERS = [
+            { name: 'E-Rank', minLevel: 1, class: 'e', dailyQuests: 1 },
+            { name: 'D-Rank', minLevel: 20, class: 'd', dailyQuests: 2 },
+            { name: 'C-Rank', minLevel: 40, class: 'c', dailyQuests: 3 },
+            { name: 'B-Rank', minLevel: 60, class: 'b', dailyQuests: 4 },
+            { name: 'A-Rank', minLevel: 80, class: 'a', dailyQuests: 5 },
+            { name: 'S-Rank', minLevel: 100, class: 's', dailyQuests: 6 },
+            { name: 'National', minLevel: 150, class: 'national', dailyQuests: 7 },
+            { name: 'Special Authority', minLevel: 200, class: 'special', dailyQuests: 8 },
+            { name: 'Monarch', minLevel: 300, class: 'monarch', dailyQuests: 9 },
+            { name: 'Shadow Monarch', minLevel: 500, class: 'shadow', dailyQuests: 10 }
+        ];
+
+        // Generic quest templates for auto-generation
+        const GENERIC_DAILY_QUESTS = [
+            { title: "Monster Hunt", description: "Hunt monsters in the designated area", difficulty: "d", xp: 100, penalty: 10 },
+            { title: "Training Session", description: "Complete intensive training", difficulty: "c", xp: 150, penalty: 15 },
+            { title: "Resource Collection", description: "Gather resources for the guild", difficulty: "e", xp: 75, penalty: 8 },
+            { title: "Escort Mission", description: "Escort the caravan through dangerous territory", difficulty: "c", xp: 200, penalty: 20 },
+            { title: "Dungeon Raid", description: "Clear a small dungeon", difficulty: "b", xp: 300, penalty: 25 },
+            { title: "Supply Run", description: "Deliver supplies to the neighboring village", difficulty: "e", xp: 80, penalty: 10 },
+            { title: "Gate Defense", description: "Defend the gate from monster waves", difficulty: "c", xp: 250, penalty: 30 },
+            { title: "Investigation", description: "Investigate unusual activity in the forest", difficulty: "b", xp: 280, penalty: 20 },
+            { title: "Rescue Operation", description: "Rescue trapped hunters", difficulty: "b", xp: 350, penalty: 35 },
+            { title: "Royal Audit", description: "Complete the royal summons", difficulty: "a", xp: 500, penalty: 40 }
+        ];
+
+        // Generic side quests
+        const GENERIC_SIDE_QUESTS = [
+            { title: "Gather Medicinal Herbs", description: "Collect rare herbs from the forest", difficulty: "d", xp: 75, gold: 2 },
+            { title: "Scout the Dungeon Entrance", description: "Recon the north dungeon gate", difficulty: "c", xp: 100, gold: 3 }
+        ];
+
+        // Generic big quests
+        const GENERIC_BIG_QUESTS = [
+            { title: "Clear the Wolf Den", description: "Wipe out the alpha wolf pack", difficulty: "b", xp: 500, gold: 10, sessions: 4 },
+            { title: "Defend the Village", description: "Protect the village from a goblin raid", difficulty: "a", xp: 1000, gold: 20, sessions: 6 }
+        ];
+
+        // ==================== GAME STATE ====================
+        let gameState = {
+            player: {
+                level: 1,
+                xp: 650,
+                maxXp: 1000,
+                hp: 100,
+                maxHp: 100,
+                rank: 'E-Rank'
+            },
+            dailyQuests: [],
+            sideQuests: [],
+            bigQuests: [],
+            systemMessage: "System initialized. Welcome, Hunter.",
+            timer: {
+                active: false,
+                questId: null,
+                questType: null,
+                timeRemaining: POMODORO_TIME,
+                isPaused: false,
+                endTimestamp: null,
+                startTimestamp: null
+            },
+            healTimer: {
+                active: false,
+                timeRemaining: HEAL_FOCUS_TIME,
+                isPaused: false,
+                endTimestamp: null,
+                startTimestamp: null
+            },
+            lastResetDate: null,
+            systemLog: [],
+            eventLog: [],
+            questsGenerated: false,
+            sideQuestsGenerated: false,
+            bigQuestsGenerated: false,
+            lastHealTimestamp: null,
+            hiddenTimestamp: null,
+            wasAbandoned: false
+        };
+
+        const MAX_EVENT_LOG = 500;
+        const EVENT_ICONS = {
+            quest_complete: '✔',
+            xp_gain: '★',
+            hp_loss: '♥',
+            hp_gain: '✔',
+            level_up: '▲',
+            rank_up: '★',
+            penalty: '⚠',
+            daily_reset: 'Ὄ5',
+            timer_start: '▶',
+            timer_pause: '⏸',
+            timer_resume: '▶',
+            timer_cancel: '✖',
+            session_forfeit: '⚠',
+            system: '⚙',
+            gold_gain: '♆',
+            gold_spend: '♆',
+            other: '●'
+        };
+
+        const EVENT_TYPE_GROUPS = {
+            timer: ['timer_start', 'timer_pause', 'timer_resume', 'timer_cancel']
+        };
+
+        // Away tracking variables (not persisted)
+        let awayStartTime = null;
+        let awayInterval = null;
+
+        // ==================== AUDIO ====================
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                if (type === 'complete') {
+                    oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    oscillator.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'penalty') {
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+                    oscillator.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'levelup') {
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    oscillator.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2);
+                    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3);
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.5);
+                } else if (type === 'rankup') {
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    oscillator.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.15);
+                    oscillator.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.3);
+                    oscillator.frequency.setValueAtTime(1046.5, audioCtx.currentTime + 0.45);
+                    oscillator.frequency.setValueAtTime(1318.5, audioCtx.currentTime + 0.6);
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.8);
+                } else if (type === 'shadowmonarch') {
+                    // Extra dramatic sound for Shadow Monarch
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    oscillator.frequency.setValueAtTime(277.18, audioCtx.currentTime + 0.2);
+                    oscillator.frequency.setValueAtTime(349.23, audioCtx.currentTime + 0.4);
+                    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime + 0.6);
+                    oscillator.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.8);
+                    oscillator.frequency.setValueAtTime(698.46, audioCtx.currentTime + 1.0);
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.2);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 1.2);
+                } else if (type === 'forfeit' || type === 'abandon') {
+                    // Distraction/forfeit sound
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    oscillator.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.4);
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    oscillator.start(audioCtx.currentTime);
+                    oscillator.stop(audioCtx.currentTime + 0.4);
+                }
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        // ==================== STORAGE ====================
+        function saveGameState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+            } catch (e) {
+                console.log('Save error:', e);
+            }
+        }
+
+        function loadGameState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const loaded = JSON.parse(saved);
+                    gameState.player = loaded.player || gameState.player;
+                    gameState.dailyQuests = loaded.dailyQuests || [];
+                    gameState.sideQuests = loaded.sideQuests || [];
+                    gameState.bigQuests = loaded.bigQuests || [];
+                    gameState.systemMessage = loaded.systemMessage;
+                    gameState.lastResetDate = loaded.lastResetDate;
+                    gameState.systemLog = loaded.systemLog || [];
+                    gameState.eventLog = loaded.eventLog || [];
+                    gameState.questsGenerated = loaded.questsGenerated || false;
+                    gameState.sideQuestsGenerated = loaded.sideQuestsGenerated || false;
+                    gameState.bigQuestsGenerated = loaded.bigQuestsGenerated || false;
+                    gameState.lastHealTimestamp = loaded.lastHealTimestamp || null;
+                    gameState.hiddenTimestamp = loaded.hiddenTimestamp || null;
+                    gameState.wasAbandoned = loaded.wasAbandoned || false;
+
+                    // Restore heal timer if was active
+                    if (loaded.healTimer && loaded.healTimer.active) {
+                        const now = Date.now();
+                        const endTime = loaded.healTimer.endTimestamp;
+                        if (endTime && endTime > now) {
+                            gameState.healTimer = {
+                                active: true,
+                                timeRemaining: Math.floor((endTime - now) / 1000),
+                                isPaused: loaded.healTimer.isPaused || false,
+                                endTimestamp: endTime,
+                                startTimestamp: loaded.healTimer.startTimestamp || null
+                            };
+                        } else {
+                            gameState.healTimer = {
+                                active: false,
+                                timeRemaining: HEAL_FOCUS_TIME,
+                                isPaused: false,
+                                endTimestamp: null,
+                                startTimestamp: null
+                            };
+                        }
+                    } else if (loaded.healTimer) {
+                        gameState.healTimer = {
+                            active: loaded.healTimer.active || false,
+                            timeRemaining: loaded.healTimer.timeRemaining || HEAL_FOCUS_TIME,
+                            isPaused: loaded.healTimer.isPaused || false,
+                            endTimestamp: loaded.healTimer.endTimestamp || null,
+                            startTimestamp: loaded.healTimer.startTimestamp || null
+                        };
+                    }
+
+                    // Restore timer if was active - keep all fields including startTimestamp
+                    if (loaded.timer && loaded.timer.active) {
+                        const now = Date.now();
+                        const endTime = loaded.timer.endTimestamp;
+                        if (endTime && endTime > now) {
+                            gameState.timer = {
+                                active: true,
+                                questId: loaded.timer.questId,
+                                questType: loaded.timer.questType,
+                                timeRemaining: Math.floor((endTime - now) / 1000),
+                                isPaused: loaded.timer.isPaused || false,
+                                endTimestamp: endTime,
+                                startTimestamp: loaded.timer.startTimestamp || null
+                            };
+                        } else {
+                            // Timer expired - just mark inactive, will be handled by checkAbandonedSession in init if there was an active session
+                            gameState.timer = {
+                                active: false,
+                                questId: loaded.timer.questId,
+                                questType: loaded.timer.questType,
+                                timeRemaining: POMODORO_TIME,
+                                isPaused: false,
+                                endTimestamp: null,
+                                startTimestamp: null
+                            };
+                        }
+                    } else if (loaded.timer) {
+                        // No active timer but has timer data - restore with all fields
+                        gameState.timer = {
+                            active: loaded.timer.active || false,
+                            questId: loaded.timer.questId || null,
+                            questType: loaded.timer.questType || null,
+                            timeRemaining: loaded.timer.timeRemaining || POMODORO_TIME,
+                            isPaused: loaded.timer.isPaused || false,
+                            endTimestamp: loaded.timer.endTimestamp || null,
+                            startTimestamp: loaded.timer.startTimestamp || null
+                        };
+                    }
+                }
+            } catch (e) {
+                console.log('Load error:', e);
+            }
+        }
+
+        // ==================== UTILITIES ====================
+        function getTodayString() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+
+        function getCurrentRank(level) {
+            for (let i = RANK_TIERS.length - 1; i >= 0; i--) {
+                if (level >= RANK_TIERS[i].minLevel) {
+                    return RANK_TIERS[i];
+                }
+            }
+            return RANK_TIERS[0];
+        }
+
+        function getRankClass(rankName) {
+            const rank = RANK_TIERS.find(r => r.name === rankName);
+            return rank ? rank.class : 'e';
+        }
+
+        function addSystemLog(message, type = '') {
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            gameState.systemLog.unshift({ time: timeStr, message: message, type: type });
+
+            if (gameState.systemLog.length > 50) {
+                gameState.systemLog = gameState.systemLog.slice(0, 50);
+            }
+
+            gameState.systemMessage = message;
+            saveGameState();
+        }
+
+        function addEventLog(type, message, details = null) {
+            const now = new Date();
+            const fullTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+            const event = {
+                id: Date.now(),
+                timestamp: fullTime,
+                type: type,
+                message: message,
+                details: details
+            };
+
+            gameState.eventLog.unshift(event);
+
+            if (gameState.eventLog.length > MAX_EVENT_LOG) {
+                gameState.eventLog = gameState.eventLog.slice(0, MAX_EVENT_LOG);
+            }
+
+            saveGameState();
+        }
+
+        function clearEventLog() {
+            if (confirm('Are you sure you want to clear all event history?')) {
+                gameState.eventLog = [];
+                saveGameState();
+                renderHistory();
+                addSystemLog('Event history cleared.', 'system');
+            }
+        }
+
+        // ==================== DAILY RESET ====================
+        function checkDailyReset() {
+            const today = getTodayString();
+            const lastReset = gameState.lastResetDate;
+
+            if (lastReset !== today) {
+                // Apply penalties for incomplete daily quests
+                if (lastReset) {
+                    gameState.dailyQuests.forEach(quest => {
+                        if (!quest.isCompleted && quest.penalty && quest.penalty.hpLoss > 0) {
+                            const oldHp = gameState.player.hp;
+                            gameState.player.hp = Math.max(0, gameState.player.hp - quest.penalty.hpLoss);
+                            const actualLoss = oldHp - gameState.player.hp;
+                            if (actualLoss > 0) {
+                                addSystemLog(`Daily quest '${quest.title}' failed. Penalty: -${actualLoss} HP.`, 'penalty');
+                                addEventLog('penalty', `Daily quest failed: ${quest.title}`, { hp: -actualLoss });
+                            }
+                        }
+                    });
+
+                    // Check for death
+                    if (gameState.player.hp <= 0) {
+                        gameState.player.hp = 1;
+                        gameState.player.xp = 0;
+                        gameState.player.level = 1;
+                        gameState.player.maxHp = 100;
+                        gameState.player.maxXp = 1000;
+                        gameState.player.rank = 'E-Rank';
+                        addSystemLog('YOU DIED! Respawning at Level 1...', 'penalty');
+                        addEventLog('penalty', 'Player died! Respawning at Level 1', { hp: 1, level: 1 });
+                    }
+                }
+
+                // Reset daily quests progress
+                gameState.dailyQuests.forEach(quest => {
+                    quest.completedSessions = 0;
+                    quest.isCompleted = false;
+                });
+
+                gameState.lastResetDate = today;
+                addSystemLog(`New day! Login bonus: +${LOGIN_BONUS_XP} XP.`, 'success');
+                addEventLog('daily_reset', 'New day! Daily quests reset', { xp: LOGIN_BONUS_XP });
+                addEventLog('xp_gain', `Login bonus: +${LOGIN_BONUS_XP} XP`, { xp: LOGIN_BONUS_XP });
+                saveGameState();
+            }
+        }
+
+        // ==================== DAILY QUEST GENERATION ====================
+        function generateDailyQuests() {
+            if (gameState.questsGenerated) return;
+
+            const currentRank = getCurrentRank(gameState.player.level);
+            const requiredQuests = currentRank.dailyQuests;
+            const existingCount = gameState.dailyQuests.filter(q => !q.generated).length;
+
+            // Only count user-created quests - add generated ones to fill the gap
+            const questsToAdd = Math.max(0, requiredQuests - existingCount);
+
+            for (let i = 0; i < questsToAdd; i++) {
+                const template = GENERIC_DAILY_QUESTS[i % GENERIC_DAILY_QUESTS.length];
+                const newQuest = {
+                    id: Date.now() + i,
+                    type: 'daily',
+                    title: template.title,
+                    description: template.description,
+                    difficulty: template.difficulty,
+                    requiredSessions: 1,
+                    completedSessions: 0,
+                    isCompleted: false,
+                    rewardXp: template.xp,
+                    rewardGold: 1,
+                    penalty: { hpLoss: template.penalty },
+                    generated: true
+                };
+                gameState.dailyQuests.push(newQuest);
+            }
+
+            if (questsToAdd > 0) {
+                gameState.questsGenerated = true;
+                addSystemLog(`Auto-generated ${questsToAdd} daily quests for ${currentRank.name}.`, 'success');
+                saveGameState();
+            }
+        }
+
+        function ensureDailyQuestsForRank() {
+            const currentRank = getCurrentRank(gameState.player.level);
+            const requiredQuests = currentRank.dailyQuests;
+            const generatedQuests = gameState.dailyQuests.filter(q => q.generated);
+
+            if (generatedQuests.length < requiredQuests) {
+                // Remove old generated quests and regenerate
+                gameState.dailyQuests = gameState.dailyQuests.filter(q => !q.generated);
+                generateDailyQuests();
+            }
+        }
+
+        function generateSideQuests() {
+            if (gameState.sideQuestsGenerated) return;
+
+            GENERIC_SIDE_QUESTS.forEach((template, index) => {
+                const newQuest = {
+                    id: Date.now() + index,
+                    type: 'side',
+                    title: template.title,
+                    description: template.description,
+                    difficulty: template.difficulty,
+                    requiredSessions: 1,
+                    completedSessions: 0,
+                    isCompleted: false,
+                    rewardXp: template.xp,
+                    rewardGold: template.gold,
+                    generated: true
+                };
+                gameState.sideQuests.push(newQuest);
+            });
+
+            gameState.sideQuestsGenerated = true;
+            addSystemLog('Side quests initialized.', 'success');
+            saveGameState();
+        }
+
+        function generateBigQuests() {
+            if (gameState.bigQuestsGenerated) return;
+
+            GENERIC_BIG_QUESTS.forEach((template, index) => {
+                const newQuest = {
+                    id: Date.now() + index,
+                    type: 'big',
+                    title: template.title,
+                    description: template.description,
+                    difficulty: template.difficulty,
+                    requiredSessions: template.sessions || 1,
+                    completedSessions: 0,
+                    isCompleted: false,
+                    rewardXp: template.xp,
+                    rewardGold: template.gold,
+                    generated: true
+                };
+                gameState.bigQuests.push(newQuest);
+            });
+
+            gameState.bigQuestsGenerated = true;
+            addSystemLog('Big quests initialized.', 'success');
+            saveGameState();
+        }
+
+        // ==================== LEVEL UP ====================
+        function checkLevelUp(source) {
+            let leveledUp = false;
+            const oldLevel = gameState.player.level;
+
+            while (gameState.player.xp >= gameState.player.maxXp) {
+                gameState.player.xp -= gameState.player.maxXp;
+                gameState.player.level++;
+                gameState.player.maxXp = Math.floor(gameState.player.maxXp * XP_SCALE);
+                gameState.player.maxHp += HP_PER_LEVEL;
+                gameState.player.hp = gameState.player.maxHp;
+                leveledUp = true;
+            }
+
+            if (leveledUp) {
+                // Check for rank changes (pass old and new levels for multi-rank scenarios)
+                checkRankChange(oldLevel, gameState.player.level);
+
+                showLevelUpBanner();
+                addSystemLog(`LEVEL UP! You are now level ${gameState.player.level}. Max HP +${HP_PER_LEVEL}. HP fully restored.`, 'levelup');
+                addEventLog('level_up', `Level up! Now level ${gameState.player.level}`, { level: gameState.player.level, hp: gameState.player.maxHp });
+                playSound('levelup');
+                saveGameState();
+            }
+
+            return leveledUp;
+        }
+
+        // ==================== RANK CHANGE ====================
+        function getRankAtLevel(level) {
+            for (let i = RANK_TIERS.length - 1; i >= 0; i--) {
+                if (level >= RANK_TIERS[i].minLevel) {
+                    return RANK_TIERS[i];
+                }
+            }
+            return RANK_TIERS[0];
+        }
+
+        function checkRankChange(oldLevel, newLevel) {
+            const oldRank = getRankAtLevel(oldLevel);
+            const newRank = getRankAtLevel(newLevel);
+
+            if (newRank.name !== oldRank.name) {
+                gameState.player.rank = newRank.name;
+
+                // Ensure enough daily quests for new rank
+                ensureDailyQuestsForRank();
+
+                // Show appropriate rank up message
+                if (newRank.name === 'Shadow Monarch') {
+                    showRankUpBanner(newRank.name, true);
+                    addSystemLog(`RANK UP! You are now ${newRank.name}. You have awakened as the SHADOW MONARCH!`, 'rankup');
+                    addEventLog('rank_up', `Rank up! Now ${newRank.name}`, { rank: newRank.name });
+                    playSound('shadowmonarch');
+                } else {
+                    showRankUpBanner(newRank.name, false);
+                    addSystemLog(`RANK UP! You are now ${newRank.name}.`, 'rankup');
+                    addEventLog('rank_up', `Rank up! Now ${newRank.name}`, { rank: newRank.name });
+                    playSound('rankup');
+                }
+            } else if (newLevel > oldLevel) {
+                // Multiple levels gained but same rank - check if we crossed a rank threshold
+                // Find any rank tiers between old and new level
+                let crossedAnyRank = false;
+                for (let i = 0; i < RANK_TIERS.length; i++) {
+                    const rankTier = RANK_TIERS[i];
+                    if (oldLevel < rankTier.minLevel && newLevel >= rankTier.minLevel) {
+                        crossedAnyRank = true;
+                        gameState.player.rank = rankTier.name;
+                        ensureDailyQuestsForRank();
+
+                        if (rankTier.name === 'Shadow Monarch') {
+                            showRankUpBanner(rankTier.name, true);
+                            addSystemLog(`RANK UP! You are now ${rankTier.name}. You have awakened as the SHADOW MONARCH!`, 'rankup');
+                            addEventLog('rank_up', `Rank up! Now ${rankTier.name}`, { rank: rankTier.name });
+                            playSound('shadowmonarch');
+                        } else {
+                            showRankUpBanner(rankTier.name, false);
+                            addSystemLog(`RANK UP! You are now ${rankTier.name}.`, 'rankup');
+                            addEventLog('rank_up', `Rank up! Now ${rankTier.name}`, { rank: rankTier.name });
+                            playSound('rankup');
+                        }
+                    }
+                }
+            }
+        }
+
+        function showLevelUpBanner() {
+            const overlay = document.createElement('div');
+            overlay.className = 'level-up-banner';
+            overlay.id = 'level-up-banner';
+            overlay.innerHTML = `
+                <div class="level-up-title">LEVEL UP!</div>
+                <div class="level-up-subtitle">You are now level ${gameState.player.level}</div>
+                <div class="level-up-stats">
+                    <div class="level-up-stat">Max HP: <span>${gameState.player.maxHp}</span></div>
+                    <div class="level-up-stat">XP: <span>${gameState.player.xp} / ${gameState.player.maxXp}</span></div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    overlay.remove();
+                }
+            }, 3000);
+        }
+
+        function showRankUpBanner(rankName, isShadowMonarch) {
+            const overlay = document.createElement('div');
+            overlay.className = 'rank-up-banner';
+            overlay.id = 'rank-up-banner';
+            overlay.innerHTML = `
+                <div class="rank-up-title">RANK UP!</div>
+                <div class="rank-up-subtitle ${isShadowMonarch ? 'rank-up-shadow-monarch' : ''}">You are now ${rankName}</div>
+            `;
+            document.body.appendChild(overlay);
+
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    overlay.remove();
+                }
+            }, 4000);
+        }
+
+        // ==================== HEAL ====================
+        function useXpToHeal() {
+            if (gameState.player.xp < HEAL_COST_XP) {
+                addSystemLog(`Not enough XP. Need ${HEAL_COST_XP} XP to heal.`);
+                return;
+            }
+
+            if (gameState.player.hp >= gameState.player.maxHp) {
+                addSystemLog(`HP is already full.`);
+                return;
+            }
+
+            const xpSpent = HEAL_COST_XP;
+            const hpHealed = Math.min(HEAL_AMOUNT, gameState.player.maxHp - gameState.player.hp);
+
+            gameState.player.xp -= xpSpent;
+            gameState.player.hp += hpHealed;
+
+            addSystemLog(`Used ${xpSpent} XP to heal ${hpHealed} HP.`, 'success');
+            addEventLog('hp_gain', `Healed for ${hpHealed} HP`, { hp: hpHealed, xp: -xpSpent });
+            saveGameState();
+            renderStatsBar();
+        }
+
+        // ==================== TIMER ====================
+        let timerInterval = null;
+        let awayCheckInterval = null;
+
+        function startTimer(questType, questId) {
+            if (gameState.timer.active) return;
+            if (gameState.healTimer.active) {
+                addSystemLog('Finish focus healing first.', 'penalty');
+                return;
+            }
+
+            initAudio();
+
+            const now = Date.now();
+            gameState.timer = {
+                active: true,
+                questId: questId,
+                questType: questType,
+                timeRemaining: POMODORO_TIME,
+                isPaused: false,
+                endTimestamp: now + (POMODORO_TIME * 1000),
+                startTimestamp: now
+            };
+
+            addSystemLog(`Focus session started for ${getQuestById(questType, questId)?.title || 'quest'}. Stay focused!`);
+            addEventLog('timer_start', `Focus session started: ${getQuestById(questType, questId)?.title || 'quest'}`);
+            saveGameState();
+
+            runTimer();
+            startAwayTracking();
+            renderAll();
+        }
+
+        function runTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                if (gameState.timer.isPaused || !gameState.timer.active) return;
+
+                const now = Date.now();
+                const remaining = Math.max(0, Math.floor((gameState.timer.endTimestamp - now) / 1000));
+
+                gameState.timer.timeRemaining = remaining;
+
+                if (remaining === 0) {
+                    completeTimer();
+                } else {
+                    renderTimer();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (!gameState.timer.active || gameState.timer.isPaused) return;
+
+            gameState.timer.isPaused = true;
+            gameState.timer.endTimestamp = Date.now() + (gameState.timer.timeRemaining * 1000);
+
+            addSystemLog('Focus session paused.');
+            addEventLog('timer_pause', 'Focus session paused');
+            stopAwayTracking();
+            saveGameState();
+            renderTimer();
+        }
+
+        function resumeTimer() {
+            if (!gameState.timer.active || !gameState.timer.isPaused) return;
+
+            gameState.timer.isPaused = false;
+            gameState.timer.endTimestamp = Date.now() + (gameState.timer.timeRemaining * 1000);
+
+            addSystemLog('Welcome back. Timer resumed.', 'success');
+            addEventLog('timer_resume', 'Focus session resumed');
+            saveGameState();
+            runTimer();
+            startAwayTracking();
+            renderTimer();
+        }
+
+        function stopTimer() {
+            if (!gameState.timer.active) return;
+
+            clearInterval(timerInterval);
+            stopAwayTracking();
+            gameState.timer = {
+                active: false,
+                questId: null,
+                questType: null,
+                timeRemaining: POMODORO_TIME,
+                isPaused: false,
+                endTimestamp: null,
+                startTimestamp: null
+            };
+
+            addSystemLog('Focus session cancelled.');
+            addEventLog('timer_cancel', 'Focus session cancelled');
+            saveGameState();
+            renderAll();
+        }
+
+        function forfeitSession(isAbandoned = false) {
+            clearInterval(timerInterval);
+            stopAwayTracking();
+
+            const quest = getQuestById(gameState.timer.questType, gameState.timer.questId);
+            const questName = quest?.title || 'session';
+
+            // Apply HP penalty
+            const oldHp = gameState.player.hp;
+            gameState.player.hp = Math.max(0, gameState.player.hp - DISTRACTION_PENALTY_HP);
+            const actualLoss = oldHp - gameState.player.hp;
+
+            playSound(isAbandoned ? 'abandon' : 'forfeit');
+
+            if (isAbandoned) {
+                addSystemLog(`Session abandoned. You left the app. -${DISTRACTION_PENALTY_HP} HP penalty.`, 'penalty');
+                addEventLog('session_forfeit', 'Session abandoned (app closed)', { hp: -DISTRACTION_PENALTY_HP });
+            } else {
+                addSystemLog(`You lost focus. Session forfeited. -${DISTRACTION_PENALTY_HP} HP penalty.`, 'penalty');
+                addEventLog('session_forfeit', 'Session forfeited (away too long)', { hp: -DISTRACTION_PENALTY_HP });
+            }
+
+            // Check for death
+            if (gameState.player.hp <= 0) {
+                gameState.player.hp = 1;
+                gameState.player.xp = 0;
+                gameState.player.level = 1;
+                gameState.player.maxHp = 100;
+                gameState.player.maxXp = 1000;
+                gameState.player.rank = 'E-Rank';
+                addSystemLog('YOU DIED! Respawning at Level 1...', 'penalty');
+                addEventLog('penalty', 'Player died! Respawning at Level 1', { hp: 1, level: 1 });
+            }
+
+            // Reset timer without completing session
+            gameState.timer = {
+                active: false,
+                questId: null,
+                questType: null,
+                timeRemaining: POMODORO_TIME,
+                isPaused: false,
+                endTimestamp: null,
+                startTimestamp: null
+            };
+
+            gameState.wasAbandoned = isAbandoned;
+            saveGameState();
+            renderAll();
+        }
+
+        function completeTimer() {
+            clearInterval(timerInterval);
+            stopAwayTracking();
+
+            const quest = getQuestById(gameState.timer.questType, gameState.timer.questId);
+
+            if (quest && !quest.isCompleted) {
+                quest.completedSessions++;
+                playSound('complete');
+
+                if (quest.completedSessions >= quest.requiredSessions) {
+                    quest.isCompleted = true;
+                    gameState.player.xp += quest.rewardXp;
+                    const oldLevel = gameState.player.level;
+                    addSystemLog(`Quest complete! ${quest.title} finished. +${quest.rewardXp} XP awarded.`, 'success');
+                    addEventLog('quest_complete', `Quest completed: ${quest.title}`, { xp: quest.rewardXp, gold: quest.rewardGold || 0 });
+                    checkLevelUp('quest');
+                } else {
+                    addSystemLog(`Focus session completed for ${quest.title}. Progress: ${quest.completedSessions}/${quest.requiredSessions}`);
+                    addEventLog('quest_complete', `Focus session: ${quest.title} (${quest.completedSessions}/${quest.requiredSessions})`);
+                }
+
+                saveGameState();
+            }
+
+            gameState.timer = {
+                active: false,
+                questId: null,
+                questType: null,
+                timeRemaining: POMODORO_TIME,
+                isPaused: false,
+                endTimestamp: null,
+                startTimestamp: null
+            };
+
+            saveGameState();
+            renderAll();
+        }
+
+        // ==================== AWAY TRACKING (ANTI-CHEAT) ====================
+        function startAwayTracking() {
+            // Track away time when tab is hidden
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+        }
+
+        function stopAwayTracking() {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            if (awayInterval) {
+                clearInterval(awayInterval);
+                awayInterval = null;
+            }
+        }
+
+        function handleVisibilityChange() {
+            if (!gameState.timer.active || gameState.timer.isPaused) return;
+
+            if (document.hidden) {
+                // Tab became hidden - pause timer immediately
+                gameState.timer.isPaused = true;
+                awayStartTime = Date.now();
+                gameState.hiddenTimestamp = awayStartTime;
+                saveGameState();
+
+                addSystemLog('Timer paused. Return to the app to continue focusing.', 'penalty');
+                renderTimer();
+
+                // Start checking for away threshold
+                if (awayInterval) clearInterval(awayInterval);
+                awayInterval = setInterval(checkAwayThreshold, 1000);
+            } else {
+                // Tab became visible again
+                if (awayInterval) {
+                    clearInterval(awayInterval);
+                    awayInterval = null;
+                }
+
+                const awayDuration = awayStartTime ? Date.now() - awayStartTime : 0;
+
+                if (awayDuration > AWAY_THRESHOLD_MS) {
+                    // Too long away - forfeit session
+                    forfeitSession(false);
+                } else if (gameState.timer.isPaused && gameState.hiddenTimestamp) {
+                    // Returned within threshold - resume
+                    gameState.timer.isPaused = false;
+                    gameState.timer.endTimestamp = Date.now() + (gameState.timer.timeRemaining * 1000);
+                    addSystemLog('Welcome back. Timer resumed.', 'success');
+                    renderTimer();
+                }
+
+                awayStartTime = null;
+                gameState.hiddenTimestamp = null;
+                saveGameState();
+            }
+        }
+
+        function checkAwayThreshold() {
+            if (!awayStartTime || !gameState.timer.active) {
+                if (awayInterval) clearInterval(awayInterval);
+                return;
+            }
+
+            const awayDuration = Date.now() - awayStartTime;
+
+            if (awayDuration > AWAY_THRESHOLD_MS) {
+                // Exceeded threshold - forfeit!
+                forfeitSession(false);
+            }
+        }
+
+        // ==================== FORFEIT ON PAGE CLOSE/RELOAD ====================
+        function checkAbandonedSession() {
+            if (!gameState.timer.active || gameState.timer.startTimestamp === null) {
+                return false;
+            }
+
+            // Session was active when page closed - it's abandoned
+            const quest = getQuestById(gameState.timer.questType, gameState.timer.questId);
+            const questName = quest?.title || 'session';
+
+            // Apply the same forfeit penalty
+            const oldHp = gameState.player.hp;
+            gameState.player.hp = Math.max(0, gameState.player.hp - DISTRACTION_PENALTY_HP);
+            const actualLoss = oldHp - gameState.player.hp;
+
+            playSound('abandon');
+
+            addSystemLog(`Session abandoned. You left the app. -${DISTRACTION_PENALTY_HP} HP penalty.`, 'penalty');
+            addEventLog('session_forfeit', 'Session abandoned (page refreshed)', { hp: -DISTRACTION_PENALTY_HP });
+
+            // Check for death
+            if (gameState.player.hp <= 0) {
+                gameState.player.hp = 1;
+                gameState.player.xp = 0;
+                gameState.player.level = 1;
+                gameState.player.maxHp = 100;
+                gameState.player.maxXp = 1000;
+                gameState.player.rank = 'E-Rank';
+                addSystemLog('YOU DIED! Respawning at Level 1...', 'penalty');
+                addEventLog('penalty', 'Player died! Respawning at Level 1', { hp: 1, level: 1 });
+            }
+
+            // Reset timer - session doesn't count
+            gameState.timer = {
+                active: false,
+                questId: null,
+                questType: null,
+                timeRemaining: POMODORO_TIME,
+                isPaused: false,
+                endTimestamp: null,
+                startTimestamp: null
+            };
+
+            gameState.wasAbandoned = true;
+
+            return true;
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // ==================== HEAL TIMER ====================
+        let healTimerInterval = null;
+
+        function startFocusHeal() {
+            if (gameState.timer.active || gameState.healTimer.active) {
+                addSystemLog('Finish current task first.', 'penalty');
+                return;
+            }
+
+            initAudio();
+
+            const now = Date.now();
+            gameState.healTimer = {
+                active: true,
+                timeRemaining: HEAL_FOCUS_TIME,
+                isPaused: false,
+                endTimestamp: now + (HEAL_FOCUS_TIME * 1000),
+                startTimestamp: now
+            };
+
+            addSystemLog('Focus healing started. Stay focused for 5 minutes!', 'success');
+            addEventLog('timer_start', 'Focus healing started (5 min)');
+            saveGameState();
+
+            runHealTimer();
+            startHealAwayTracking();
+            renderStatsBar();
+        }
+
+        function runHealTimer() {
+            if (healTimerInterval) clearInterval(healTimerInterval);
+
+            healTimerInterval = setInterval(() => {
+                if (gameState.healTimer.isPaused || !gameState.healTimer.active) return;
+
+                const now = Date.now();
+                const remaining = Math.max(0, Math.floor((gameState.healTimer.endTimestamp - now) / 1000));
+
+                gameState.healTimer.timeRemaining = remaining;
+
+                if (remaining === 0) {
+                    completeHealSession();
+                } else {
+                    renderHealTimer();
+                }
+            }, 1000);
+        }
+
+        function completeHealSession() {
+            clearInterval(healTimerInterval);
+            stopHealAwayTracking();
+
+            // Calculate 20% of max HP
+            const healAmount = Math.ceil(gameState.player.maxHp * (HEAL_PERCENT / 100));
+            const actualHeal = Math.min(healAmount, gameState.player.maxHp - gameState.player.hp);
+
+            if (actualHeal > 0) {
+                gameState.player.hp += actualHeal;
+                gameState.lastHealTimestamp = Date.now();
+                playSound('complete');
+                addSystemLog(`Focus healing complete. Restored ${actualHeal} HP.`, 'success');
+                addEventLog('hp_gain', `Focus healing: restored ${actualHeal} HP`, { hp: actualHeal });
+            }
+
+            // Reset heal timer
+            gameState.healTimer = {
+                active: false,
+                timeRemaining: HEAL_FOCUS_TIME,
+                isPaused: false,
+                endTimestamp: null,
+                startTimestamp: null
+            };
+
+            saveGameState();
+            renderStatsBar();
+            renderProfile();
+        }
+
+        function forfeitHealSession() {
+            clearInterval(healTimerInterval);
+            stopHealAwayTracking();
+
+            // Apply HP penalty for abandoning
+            const oldHp = gameState.player.hp;
+            gameState.player.hp = Math.max(0, gameState.player.hp - DISTRACTION_PENALTY_HP);
+            const actualLoss = oldHp - gameState.player.hp;
+
+            playSound('abandon');
+            addSystemLog(`Focus healing abandoned. -${DISTRACTION_PENALTY_HP} HP penalty.`, 'penalty');
+            addEventLog('session_forfeit', 'Focus healing abandoned', { hp: -DISTRACTION_PENALTY_HP });
+
+            // Check for death
+            if (gameState.player.hp <= 0) {
+                gameState.player.hp = 1;
+                gameState.player.xp = 0;
+                gameState.player.level = 1;
+                gameState.player.maxHp = 100;
+                gameState.player.maxXp = 1000;
+                gameState.player.rank = 'E-Rank';
+                addSystemLog('YOU DIED! Respawning at Level 1...', 'penalty');
+                addEventLog('penalty', 'Player died! Respawning at Level 1', { hp: 1, level: 1 });
+            }
+
+            // Reset heal timer - no HP restored
+            gameState.healTimer = {
+                active: false,
+                timeRemaining: HEAL_FOCUS_TIME,
+                isPaused: false,
+                endTimestamp: null,
+                startTimestamp: null
+            };
+
+            saveGameState();
+            renderStatsBar();
+            renderProfile();
+        }
+
+        function renderHealTimer() {
+            const isPaused = gameState.healTimer.isPaused;
+            const containerClass = isPaused ? 'heal-timer-container paused' : 'heal-timer-container';
+            const displayClass = isPaused ? 'heal-timer-display paused' : 'heal-timer-display';
+
+            // Add to stats bar or create a floating element
+            const hpContainer = document.querySelector('.hp-container');
+            if (hpContainer) {
+                const existingTimer = document.getElementById('heal-timer-display');
+                if (existingTimer) {
+                    existingTimer.closest('.heal-timer-container')?.remove();
+                }
+
+                const timerHtml = `
+                    <div class="${containerClass}" id="heal-timer">
+                        <div class="heal-timer-title">Focus Healing</div>
+                        <div class="${displayClass}" id="heal-timer-display">${formatTime(gameState.healTimer.timeRemaining)}</div>
+                        <div class="heal-timer-controls">
+                            ${isPaused
+                                ? `<button class="heal-timer-btn" onclick="resumeHealTimer()">Resume</button>`
+                                : `<button class="heal-timer-btn" onclick="pauseHealTimer()">Pause</button>`
+                            }
+                            <button class="heal-timer-btn cancel" onclick="cancelHealTimer()">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                hpContainer.insertAdjacentHTML('afterend', timerHtml);
+            }
+        }
+
+        function pauseHealTimer() {
+            if (!gameState.healTimer.active || gameState.healTimer.isPaused) return;
+
+            gameState.healTimer.isPaused = true;
+            gameState.healTimer.endTimestamp = Date.now() + (gameState.healTimer.timeRemaining * 1000);
+
+            addSystemLog('Focus healing paused.');
+            saveGameState();
+            renderHealTimer();
+        }
+
+        function resumeHealTimer() {
+            if (!gameState.healTimer.active || !gameState.healTimer.isPaused) return;
+
+            gameState.healTimer.isPaused = false;
+            gameState.healTimer.endTimestamp = Date.now() + (gameState.healTimer.timeRemaining * 1000);
+
+            addSystemLog('Focus healing resumed.', 'success');
+            saveGameState();
+            runHealTimer();
+            renderHealTimer();
+        }
+
+        function cancelHealTimer() {
+            if (!gameState.healTimer.active) return;
+
+            clearInterval(healTimerInterval);
+            stopHealAwayTracking();
+
+            addSystemLog('Focus healing cancelled.');
+            addEventLog('timer_cancel', 'Focus healing cancelled');
+
+            gameState.healTimer = {
+                active: false,
+                timeRemaining: HEAL_FOCUS_TIME,
+                isPaused: false,
+                endTimestamp: null,
+                startTimestamp: null
+            };
+
+            saveGameState();
+            renderStatsBar();
+        }
+
+        // ==================== HEAL AWAY TRACKING ====================
+        let healAwayStartTime = null;
+        let healAwayInterval = null;
+
+        function startHealAwayTracking() {
+            document.addEventListener('visibilitychange', handleHealVisibilityChange);
+        }
+
+        function stopHealAwayTracking() {
+            document.removeEventListener('visibilitychange', handleHealVisibilityChange);
+            if (healAwayInterval) {
+                clearInterval(healAwayInterval);
+                healAwayInterval = null;
+            }
+        }
+
+        function handleHealVisibilityChange() {
+            if (!gameState.healTimer.active || gameState.healTimer.isPaused) return;
+
+            if (document.hidden) {
+                // Tab became hidden - pause heal timer
+                gameState.healTimer.isPaused = true;
+                healAwayStartTime = Date.now();
+                saveGameState();
+
+                addSystemLog('Focus healing paused. Return to continue.', 'penalty');
+                renderHealTimer();
+
+                if (healAwayInterval) clearInterval(healAwayInterval);
+                healAwayInterval = setInterval(checkHealAwayThreshold, 1000);
+            } else {
+                // Tab became visible
+                if (healAwayInterval) {
+                    clearInterval(healAwayInterval);
+                    healAwayInterval = null;
+                }
+
+                const awayDuration = healAwayStartTime ? Date.now() - healAwayStartTime : 0;
+
+                if (awayDuration > AWAY_THRESHOLD_MS) {
+                    // Too long away - forfeit healing
+                    forfeitHealSession();
+                } else if (gameState.healTimer.isPaused && healAwayStartTime) {
+                    // Returned within threshold - resume
+                    gameState.healTimer.isPaused = false;
+                    gameState.healTimer.endTimestamp = Date.now() + (gameState.healTimer.timeRemaining * 1000);
+                    addSystemLog('Welcome back. Focus healing resumed.', 'success');
+                    runHealTimer();
+                    renderHealTimer();
+                }
+
+                healAwayStartTime = null;
+                saveGameState();
+            }
+        }
+
+        function checkHealAwayThreshold() {
+            if (!healAwayStartTime || !gameState.healTimer.active) {
+                if (healAwayInterval) clearInterval(healAwayInterval);
+                return;
+            }
+
+            const awayDuration = Date.now() - healAwayStartTime;
+
+            if (awayDuration > AWAY_THRESHOLD_MS) {
+                // Exceeded threshold - forfeit!
+                forfeitHealSession();
+            }
+        }
+
+        // ==================== QUEST HELPERS ====================
+        function getQuestById(questType, id) {
+            let questArray;
+            if (questType === 'daily') questArray = gameState.dailyQuests;
+            else if (questType === 'side') questArray = gameState.sideQuests;
+            else if (questType === 'big') questArray = gameState.bigQuests;
+            return questArray ? questArray.find(q => q.id === id) : null;
+        }
+
+        // ==================== RENDERING ====================
+        function renderStatsBar() {
+            const statsBar = document.getElementById('stats-bar');
+            const xpPercent = (gameState.player.xp / gameState.player.maxXp) * 100;
+            const canHeal = gameState.player.xp >= HEAL_COST_XP && gameState.player.hp < gameState.player.maxHp;
+            const rankClass = getRankClass(gameState.player.rank);
+
+            // Check heal cooldown
+            const now = Date.now();
+            const healCooldownRemaining = gameState.lastHealTimestamp ? Math.max(0, gameState.lastHealTimestamp + HEAL_COOLDOWN - now) : 0;
+            const canUseFocusHeal = !gameState.timer.active && !gameState.healTimer.active && !canHeal;
+            const isHealingActive = gameState.healTimer.active;
+
+            statsBar.innerHTML = `
+                <div class="level-badge">
+                    <span class="level-label">Level</span>
+                    <span class="level-value">${gameState.player.level}</span>
+                    <span class="rank-badge ${rankClass}">${gameState.player.rank}</span>
+                </div>
+                <div class="xp-container">
+                    <div class="xp-label">
+                        <span>XP</span>
+                        <span>${gameState.player.xp} / ${gameState.player.maxXp}</span>
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-fill" style="width: ${xpPercent}%"></div>
+                    </div>
+                </div>
+                <div class="hp-container">
+                    <span class="hp-icon">&#9829;</span>
+                    <span class="hp-value">${gameState.player.hp}/${gameState.player.maxHp}</span>
+                    <button class="heal-btn" onclick="useXpToHeal()" ${canHeal ? '' : 'disabled'} title="Spend ${HEAL_COST_XP} XP to heal ${HEAL_AMOUNT} HP">
+                        Heal
+                    </button>
+                    <button class="heal-btn ${isHealingActive ? 'active' : ''}" onclick="startFocusHeal()" ${canUseFocusHeal && healCooldownRemaining <= 0 ? '' : 'disabled'} title="Focus healing: 5 min to restore ${HEAL_PERCENT}% HP">
+                        ${isHealingActive ? 'Healing...' : 'Focus Heal'}
+                    </button>
+                    ${healCooldownRemaining > 0 && !isHealingActive ? `<div class="cooldown-timer">Cooldown: ${formatTime(Math.ceil(healCooldownRemaining / 1000))}</div>` : ''}
+                </div>
+            `;
+
+            // Render heal timer if active
+            if (gameState.healTimer.active) {
+                renderHealTimer();
+            }
+        }
+
+        function renderProfile() {
+            const profileContent = document.getElementById('profile-content');
+            const xpPercent = (gameState.player.xp / gameState.player.maxXp) * 100;
+            const rankClass = getRankClass(gameState.player.rank);
+            const currentRank = getCurrentRank(gameState.player.level);
+            const dailyQuestsCount = gameState.dailyQuests.length;
+
+            // Build rank ladder
+            const rankLadderHtml = RANK_TIERS.map(rank => {
+                const isAchieved = gameState.player.level >= rank.minLevel;
+                const isCurrent = rank.name === gameState.player.rank;
+                return `<span class="profile-rank-item ${rank.class} ${isAchieved ? 'achieved' : ''} ${isCurrent ? 'current' : ''}">${rank.name}</span>`;
+            }).join('');
+
+            profileContent.innerHTML = `
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <div class="profile-stat-label">Rank</div>
+                        <div class="profile-stat-value" style="color: var(--rank-${rankClass})">${gameState.player.rank}</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-label">Level</div>
+                        <div class="profile-stat-value">${gameState.player.level}</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-label">XP Progress</div>
+                        <div class="profile-stat-value">${xpPercent.toFixed(1)}%</div>
+                    </div>
+                    <div class="profile-stat">
+                        <div class="profile-stat-label">HP</div>
+                        <div class="profile-stat-value">${gameState.player.hp}/${gameState.player.maxHp}</div>
+                    </div>
+                    <div class="profile-stat" style="grid-column: span 2;">
+                        <div class="profile-stat-label">Daily Quests</div>
+                        <div class="profile-stat-value">${dailyQuestsCount} / ${currentRank.dailyQuests} required</div>
+                    </div>
+                </div>
+                <div class="profile-rank-ladder">
+                    <div class="profile-rank-ladder-title">Rank Progression</div>
+                    <div class="profile-rank-list">${rankLadderHtml}</div>
+                </div>
+            `;
+        }
+
+        function renderSystemMessage() {
+            const logContainer = document.getElementById('system-log');
+            if (gameState.systemLog.length === 0) {
+                logContainer.innerHTML = `
+                    <div class="system-log-entry">
+                        <span class="system-log-time">00:00</span>
+                        <span class="system-log-text">System initialized. Welcome, Hunter.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            logContainer.innerHTML = gameState.systemLog.slice(0, LOG_ENTRIES).map(entry => {
+                const typeClass = entry.type || '';
+                return `
+                    <div class="system-log-entry ${typeClass}">
+                        <span class="system-log-time">${entry.time}</span>
+                        <span class="system-log-text">${entry.message}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function createQuestCard(quest, hasPenalty = false) {
+            const progress = (quest.completedSessions / quest.requiredSessions) * 100;
+            const isDisabled = quest.isCompleted || (gameState.timer.active && gameState.timer.questId === quest.id && gameState.timer.questType === quest.type);
+            const isTimerActive = gameState.timer.active && gameState.timer.questId === quest.id && gameState.timer.questType === quest.type;
+
+            let rewardsHtml = `<div class="quest-rewards">`;
+            if (quest.rewardXp) {
+                rewardsHtml += `<div class="reward-item"><span class="reward-icon">&#9733;</span><span class="reward-value">${quest.rewardXp} XP</span></div>`;
+            }
+            if (quest.rewardGold) {
+                rewardsHtml += `<div class="reward-item"><span class="reward-icon">&#9736;</span><span class="reward-value">${quest.rewardGold} Gold</span></div>`;
+            }
+            if (quest.rewardItem) {
+                rewardsHtml += `<div class="reward-item"><span class="reward-icon">&#9670;</span><span class="reward-value">${quest.rewardItem}</span></div>`;
+            }
+            rewardsHtml += `</div>`;
+
+            return `
+                <div class="quest-card" data-quest-id="${quest.id}" data-quest-type="${quest.type}">
+                    <div class="quest-header">
+                        <span class="quest-title">${quest.title}</span>
+                        <span class="quest-difficulty ${quest.difficulty}">${quest.difficulty.toUpperCase()}</span>
+                    </div>
+                    <div class="quest-description">${quest.description}</div>
+                    <div class="quest-progress">
+                        <div class="quest-progress-label">
+                            <span>Progress</span>
+                            <span>${quest.completedSessions} / ${quest.requiredSessions}</span>
+                        </div>
+                        <div class="quest-progress-bar">
+                            <div class="quest-progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+                    ${rewardsHtml}
+                    ${hasPenalty && quest.penalty ? `<div class="quest-penalty"><span class="penalty-icon">&#9888;</span> Failure penalty: -${quest.penalty.hpLoss} HP</div>` : ''}
+                    ${!quest.isCompleted ? `<button class="start-focus-btn" onclick="startTimer('${quest.type}', ${quest.id})" ${isDisabled ? 'disabled' : ''}>${isTimerActive ? 'In Progress...' : 'Start Focus Session'}</button>` : ''}
+                </div>
+            `;
+        }
+
+        function renderDailyQuests() {
+            const container = document.getElementById('daily-quests');
+            if (gameState.dailyQuests.length === 0) {
+                container.innerHTML = '<p class="empty-message">No daily quests available</p>';
+            } else {
+                container.innerHTML = gameState.dailyQuests.map(q => createQuestCard(q, true)).join('');
+            }
+        }
+
+        function renderSideQuests() {
+            const container = document.getElementById('side-quests');
+            if (gameState.sideQuests.length === 0) {
+                container.innerHTML = '<p class="empty-message">No side quests available</p>';
+            } else {
+                container.innerHTML = gameState.sideQuests.map(q => createQuestCard(q, false)).join('');
+            }
+        }
+
+        function renderBigQuests() {
+            const container = document.getElementById('big-quests');
+            if (gameState.bigQuests.length === 0) {
+                container.innerHTML = '<p class="empty-message">No big quests available</p>';
+            } else {
+                container.innerHTML = gameState.bigQuests.map(q => createQuestCard(q, false)).join('');
+            }
+        }
+
+        function renderTimer() {
+            const quest = getQuestById(gameState.timer.questType, gameState.timer.questId);
+            if (!quest || !gameState.timer.active) return;
+
+            const isPaused = gameState.timer.isPaused;
+            const timerContainerClass = isPaused ? 'timer-container paused' : 'timer-container';
+            const timerDisplayClass = isPaused ? 'timer-display paused' : 'timer-display';
+
+            const timerHtml = `
+                <div class="${timerContainerClass}" id="active-timer">
+                    <div class="timer-title">Focus: ${quest.title}</div>
+                    <div class="${timerDisplayClass}">${formatTime(gameState.timer.timeRemaining)}</div>
+                    <div class="timer-controls">
+                        ${isPaused
+                            ? `<button class="timer-btn" onclick="resumeTimer()">Resume</button>`
+                            : `<button class="timer-btn pause" onclick="pauseTimer()">Pause</button>`
+                        }
+                        <button class="timer-btn reset" onclick="stopTimer()">Reset</button>
+                    </div>
+                    <div class="timer-warning">${isPaused ? 'Timer paused - click Resume to continue' : 'Leaving the app will forfeit your session.'}</div>
+                </div>
+            `;
+
+            const questCard = document.querySelector(`[data-quest-id="${quest.id}"][data-quest-type="${gameState.timer.questType}"]`);
+            if (questCard) {
+                const existingTimer = document.getElementById('active-timer');
+                if (existingTimer) existingTimer.remove();
+                questCard.insertAdjacentHTML('afterend', timerHtml);
+            }
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-list');
+            const filterSelect = document.getElementById('history-filter');
+            const searchInput = document.getElementById('history-search');
+
+            const filterType = filterSelect ? filterSelect.value : 'all';
+            const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+
+            // Apply filter
+            let filteredEvents = gameState.eventLog;
+
+            // Type filter
+            if (filterType !== 'all') {
+                if (filterType === 'timer') {
+                    filteredEvents = filteredEvents.filter(e =>
+                        ['timer_start', 'timer_pause', 'timer_resume', 'timer_cancel'].includes(e.type)
+                    );
+                } else if (filterType === 'hp_change') {
+                    filteredEvents = filteredEvents.filter(e =>
+                        e.type === 'hp_loss' || e.type === 'hp_gain'
+                    );
+                } else {
+                    filteredEvents = filteredEvents.filter(e => e.type === filterType);
+                }
+            }
+
+            // Search filter
+            if (searchTerm) {
+                filteredEvents = filteredEvents.filter(e =>
+                    e.message.toLowerCase().includes(searchTerm) ||
+                    (e.details && JSON.stringify(e.details).toLowerCase().includes(searchTerm))
+                );
+            }
+
+            // Limit to 100
+            filteredEvents = filteredEvents.slice(0, 100);
+
+            if (filteredEvents.length === 0) {
+                container.innerHTML = '<p class="history-empty">No events found.</p>';
+                return;
+            }
+
+            container.innerHTML = filteredEvents.map(event => {
+                const icon = EVENT_ICONS[event.type] || EVENT_ICONS.other;
+                let detailsHtml = '';
+
+                if (event.details) {
+                    const details = [];
+                    if (event.details.xp !== undefined) {
+                        details.push(`<span class="history-detail xp">+${event.details.xp} XP</span>`);
+                    }
+                    if (event.details.hp !== undefined) {
+                        const hpClass = event.details.hp < 0 ? 'hp_loss' : 'hp_gain';
+                        details.push(`<span class="history-detail ${hpClass}">${event.details.hp > 0 ? '+' : ''}${event.details.hp} HP</span>`);
+                    }
+                    if (event.details.gold !== undefined) {
+                        details.push(`<span class="history-detail gold">${event.details.gold > 0 ? '+' : ''}${event.details.gold} Gold</span>`);
+                    }
+                    if (event.details.level !== undefined) {
+                        details.push(`<span class="history-detail level">LVL ${event.details.level}</span>`);
+                    }
+                    if (event.details.rank !== undefined) {
+                        details.push(`<span class="history-detail rank">${event.details.rank}</span>`);
+                    }
+                    if (details.length > 0) {
+                        detailsHtml = `<div class="history-details">${details.join('')}</div>`;
+                    }
+                }
+
+                return `
+                    <div class="history-card ${event.type}">
+                        <div class="history-card-header">
+                            <div>
+                                <span class="history-icon">${icon}</span>
+                            </div>
+                            <span class="history-type-badge ${event.type}">${event.type.replace('_', ' ')}</span>
+                        </div>
+                        <div class="history-timestamp">${event.timestamp}</div>
+                        <div class="history-message">${event.message}</div>
+                        ${detailsHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function exportEventLog() {
+            const events = gameState.eventLog;
+            if (events.length === 0) {
+                addSystemLog('No events to export.', 'system');
+                return;
+            }
+
+            const text = events.map(e => {
+                let line = `[${e.timestamp}] ${e.type.toUpperCase()}: ${e.message}`;
+                if (e.details) {
+                    const parts = [];
+                    if (e.details.xp) parts.push(`XP: ${e.details.xp}`);
+                    if (e.details.hp) parts.push(`HP: ${e.details.hp}`);
+                    if (e.details.gold) parts.push(`Gold: ${e.details.gold}`);
+                    if (e.details.level) parts.push(`Level: ${e.details.level}`);
+                    if (e.details.rank) parts.push(`Rank: ${e.details.rank}`);
+                    if (parts.length) line += ` (${parts.join(', ')})`;
+                }
+                return line;
+            }).join('\n');
+
+            try {
+                navigator.clipboard.writeText(text).then(() => {
+                    addSystemLog('Event log copied to clipboard.', 'success');
+                }).catch(() => {
+                    // Fallback
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    addSystemLog('Event log copied to clipboard.', 'success');
+                });
+            } catch (e) {
+                addSystemLog('Failed to copy to clipboard.', 'penalty');
+            }
+        }
+
+        function renderAll() {
+            renderStatsBar();
+            renderProfile();
+            renderDailyQuests();
+            renderSideQuests();
+            renderBigQuests();
+            renderHistory();
+
+            if (gameState.timer.active) {
+                setTimeout(renderTimer, 100);
+            }
+
+            if (gameState.healTimer.active) {
+                setTimeout(renderHealTimer, 100);
+            }
+        }
+
+        // ==================== QUEST FORMS ====================
+        function toggleAddForm(type) {
+            const toggle = document.querySelector(`#${type} .add-quest-toggle`);
+            const form = document.getElementById(`${type}-form`);
+            if (toggle && form) {
+                toggle.classList.toggle('active');
+                form.classList.toggle('active');
+            }
+        }
+
+        function validateForm(type) {
+            let isValid = true;
+
+            const titleInput = document.getElementById(`${type}-title`);
+            const titleError = document.getElementById(`${type}-title-error`);
+            if (titleInput && titleError) {
+                if (!titleInput.value.trim()) {
+                    titleError.classList.add('show');
+                    isValid = false;
+                } else {
+                    titleError.classList.remove('show');
+                }
+            }
+
+            const sessionsInput = document.getElementById(`${type}-sessions`);
+            const sessionsError = document.getElementById(`${type}-sessions-error`);
+            if (sessionsInput && sessionsError) {
+                if (parseInt(sessionsInput.value) < 1) {
+                    sessionsError.classList.add('show');
+                    isValid = false;
+                } else {
+                    sessionsError.classList.remove('show');
+                }
+            }
+
+            return isValid;
+        }
+
+        function submitDailyQuest() {
+            if (!validateForm('daily')) return;
+
+            const title = document.getElementById('daily-title').value.trim();
+            const desc = document.getElementById('daily-desc').value.trim();
+            const sessions = parseInt(document.getElementById('daily-sessions').value);
+            const penalty = parseInt(document.getElementById('daily-penalty').value);
+
+            const newQuest = {
+                id: Date.now(),
+                type: 'daily',
+                title: title,
+                description: desc || 'Complete your daily task',
+                difficulty: 'c',
+                requiredSessions: sessions,
+                completedSessions: 0,
+                isCompleted: false,
+                rewardXp: 100,
+                rewardGold: 1,
+                penalty: { hpLoss: penalty }
+            };
+
+            gameState.dailyQuests.push(newQuest);
+            addSystemLog(`New daily quest added: ${title}`, 'success');
+
+            saveGameState();
+            toggleAddForm('daily');
+            renderAll();
+
+            document.getElementById('daily-title').value = '';
+            document.getElementById('daily-desc').value = '';
+            document.getElementById('daily-sessions').value = '1';
+            document.getElementById('daily-penalty').value = '10';
+        }
+
+        function submitSideQuest() {
+            if (!validateForm('side')) return;
+
+            const title = document.getElementById('side-title').value.trim();
+            const desc = document.getElementById('side-desc').value.trim();
+            const sessions = parseInt(document.getElementById('side-sessions').value);
+            const xp = parseInt(document.getElementById('side-xp').value);
+            const item = document.getElementById('side-item').value.trim();
+
+            let difficulty = 'd';
+            if (sessions >= 5) difficulty = 'b';
+            if (sessions >= 10) difficulty = 'a';
+
+            const newQuest = {
+                id: Date.now(),
+                type: 'side',
+                title: title,
+                description: desc || 'Complete this side quest',
+                difficulty: difficulty,
+                requiredSessions: sessions,
+                completedSessions: 0,
+                isCompleted: false,
+                rewardXp: xp,
+                rewardItem: item || null
+            };
+
+            gameState.sideQuests.push(newQuest);
+            addSystemLog(`New side quest added: ${title}`, 'success');
+
+            saveGameState();
+            toggleAddForm('side');
+            renderAll();
+
+            document.getElementById('side-title').value = '';
+            document.getElementById('side-desc').value = '';
+            document.getElementById('side-sessions').value = '1';
+            document.getElementById('side-xp').value = '100';
+            document.getElementById('side-item').value = '';
+        }
+
+        function submitBigQuest() {
+            if (!validateForm('big')) return;
+
+            const title = document.getElementById('big-title').value.trim();
+            const desc = document.getElementById('big-desc').value.trim();
+            const sessions = parseInt(document.getElementById('big-sessions').value);
+            const xp = parseInt(document.getElementById('big-xp').value);
+            const item = document.getElementById('big-item').value.trim();
+            const isMainStory = document.getElementById('big-main').checked;
+
+            let difficulty = 'c';
+            if (sessions >= 5) difficulty = 'b';
+            if (sessions >= 10) difficulty = 'a';
+            if (sessions >= 20) difficulty = 's';
+
+            const newQuest = {
+                id: Date.now(),
+                type: 'big',
+                title: title,
+                description: desc || 'Complete this big quest',
+                difficulty: difficulty,
+                requiredSessions: sessions,
+                completedSessions: 0,
+                isCompleted: false,
+                rewardXp: xp,
+                rewardItem: item || null,
+                isMainStory: isMainStory
+            };
+
+            gameState.bigQuests.push(newQuest);
+            addSystemLog(`New big quest added: ${title}${isMainStory ? ' (Main Story)' : ''}`, 'success');
+
+            saveGameState();
+            toggleAddForm('big');
+            renderAll();
+
+            document.getElementById('big-title').value = '';
+            document.getElementById('big-desc').value = '';
+            document.getElementById('big-sessions').value = '1';
+            document.getElementById('big-xp').value = '500';
+            document.getElementById('big-item').value = '';
+            document.getElementById('big-main').checked = false;
+        }
+
+        // ==================== PROFILE TOGGLE ====================
+        function toggleProfile() {
+            const content = document.getElementById('profile-content');
+            const toggle = document.getElementById('profile-toggle');
+            content.classList.toggle('open');
+            toggle.classList.toggle('open');
+        }
+
+        // ==================== TABS ====================
+        function setupTabs() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const tab = btn.dataset.tab;
+                    document.querySelectorAll('.quest-section').forEach(s => s.classList.remove('active'));
+                    document.getElementById(tab).classList.add('active');
+                });
+            });
+        }
+
+        // ==================== DELETE ALL DATA ====================
+        function deleteAllData() {
+            if (confirm('Are you sure you want to reset all data? This cannot be undone.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
+
+        // ==================== INIT ====================
+        function init() {
+            loadGameState();
+
+            // Check FIRST if a session was abandoned (user closed app during focus)
+            const wasAbandoned = checkAbandonedSession();
+
+            // Ensure rank is set correctly based on current level
+            gameState.player.rank = getCurrentRank(gameState.player.level).name;
+
+            checkDailyReset();
+            generateDailyQuests();
+            ensureDailyQuestsForRank();
+            generateSideQuests();
+            generateBigQuests();
+
+            // Check for rank changes on load (in case of large level jumps)
+            const oldLevel = gameState.player.level;
+            checkRankChange(oldLevel, oldLevel);
+
+            setupTabs();
+            renderAll();
+
+            if (gameState.timer.active) {
+                // Resume active timer session
+                runTimer();
+                startAwayTracking();
+            }
+
+            if (gameState.healTimer.active) {
+                // Resume active heal timer session
+                runHealTimer();
+                startHealAwayTracking();
+            }
+
+            addSystemLog('System initialized. Welcome, Hunter.');
+        }
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>
